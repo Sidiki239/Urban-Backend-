@@ -25,12 +25,12 @@ const createReleve = asyncHandler(async (req, res) => {
     }
   });
 
-const getAllReleve = asyncHandler(async (req, res) => {
+  const getAllReleve = asyncHandler(async (req, res) => {
     try {
-       const getReleve = await Releve.find();
-       res.json(getReleve);
+        const getReleve = await Releve.find().sort({ date_releveur: -1 });
+        res.json(getReleve);
     } catch (error) {
-        throw new Error(error)
+        throw new Error(error);
     }
 });
 

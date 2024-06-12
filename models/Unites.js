@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const UnitesSchema = new mongoose.Schema({
 
-  zone: { type: String, required: true ,},
+  zone: { type: String, required: false ,},
   reference: { type: String, required: true },
   type: {  type: String,
     enum: ["rural", "urbain"],

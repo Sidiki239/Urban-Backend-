@@ -3,6 +3,7 @@ const asyncHandler = require('express-async-handler');
 const { generateToken } = require("../config/jwtToken");
 const { generateRefreshToken } = require("../config/refreshtoken");
 const bcrypt = require("bcrypt");
+const mongoose = require("mongoose");
 
 
 const createUser = asyncHandler(async (req, res) => {
@@ -14,14 +15,14 @@ const createUser = asyncHandler(async (req, res) => {
           // Si le Pseudo existe déjà, renvoyer un message d'erreur
           return res.status(400).json({ error: "Le Pseudo existe déjà." });
         }
-    
+      
         // Hasher le mot de passe
         const hashedPassword = await bcrypt.hash(password, 10);
         const todayDate1 = new Date();
         const day = todayDate1.getDate();
         const month = todayDate1.getMonth() + 1; // Les mois sont indexés à partir de 0, donc on ajoute 1
         const year = todayDate1.getFullYear();
-        const todayDate = day + '/' + month + '/' + year;
+       // const todayDate = day + '/' + month + '/' + year;
         // Créer l'utilisateur dans la base de données
         await User.create({
           username,nom,prenom,
@@ -40,6 +41,82 @@ const createUser = asyncHandler(async (req, res) => {
 
 
 
+
+    const updatePassword = asyncHandler(async (req, res) => {
+      const { id_user, oldPassword, newPassword } = req.body;
+    const id  = req.params.id
+   /*    if (!id_user || id_user.length !== 24) {
+        return res.status(400).json({ error: "ID utilisateur non valide" });
+      } */
+    
+      try {
+        const userToUpdate = await User.findById(id);
+        if (!userToUpdate) {
+          return res.status(404).json({ error: "Utilisateur non trouvé" });
+        }
+    
+        const isSamePassword = await bcrypt.compare(oldPassword, userToUpdate.password);
+        if (!isSamePassword) {
+          return res.status(400).json({ error: "L'ancien mot de passe est incorrect" });
+        } 
+    
+        const isOldPasswordSameAsNew = await bcrypt.compare(oldPassword, userToUpdate.password);
+        if (isOldPasswordSameAsNew) {
+          return res.status(400).json({ error: "Le nouveau mot de passe ne peut pas être le même que l'ancien mot de passe" });
+        }
+    
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        userToUpdate.password = hashedPassword;
+        await userToUpdate.save();
+    
+        res.status(200).json({ status: "SUCCESS" });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Erreur interne du serveur" });
+      }
+    });
+    
+    
+
+const updateUserInfo = asyncHandler(async (req, res) => {
+  const id2 = req.params.id;
+  const { username, nom, prenom, userType, password } = req.body;
+
+  try {
+    // Récupérer l'utilisateur courant
+    const currentUser = await User.findById(req.user.id);
+
+    // Vérifier si l'utilisateur courant est un administrateur
+    if (currentUser.userType !== 'admin') {
+      return res.status(403).json({ error: 'Accès refusé : vous n\'êtes pas un administrateur' });
+    }
+
+    // Récupérer l'utilisateur à mettre à jour
+    const updateUser = await User.findById(id2);
+
+    if (!updateUser) {
+      return res.status(404).json({ error: "Utilisateur non trouvé" });
+    }
+
+    // Mettre à jour le mot de passe
+  //  updateUser.password = password;
+
+    // Mettre à jour les autres informations de l'utilisateur
+    updateUser.username = username;
+    updateUser.nom = nom;
+    updateUser.prenom = prenom;
+    if(userType !== "admin"){
+    updateUser.userType = userType;
+  }
+    // Enregistrer les modifications
+    await updateUser.save();
+
+    res.status(200).json({ status: "SUCCESS" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erreur interne du serveur" });
+  }
+});
 
 
 
@@ -155,7 +232,8 @@ router.put('/changePassword/:id', async (req, res) => {
 
 const getAllUser = asyncHandler(async (req, res) => {
     try {
-       const getUser = await User.find();
+       const getUser = await User.find().sort({ date_ajout: -1 })
+      
        res.json(getUser);
     } catch (error) {
         throw new Error(error)
@@ -164,7 +242,7 @@ const getAllUser = asyncHandler(async (req, res) => {
 
 
 module.exports = {
-    createUser , loginUser, getAllUser,updateUser,deleteaUser
+    createUser , loginUser, getAllUser,updateUser,deleteaUser,updateUserInfo,updatePassword
 }
 
 
