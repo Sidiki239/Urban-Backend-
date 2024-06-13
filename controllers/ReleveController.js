@@ -2,29 +2,29 @@ const Releve = require("../models/Releves");
 const asyncHandler = require('express-async-handler');
 
 const createReleve = asyncHandler(async (req, res) => {
-    try {
-      const { id_releveur, nombre_compteur, ref_zone, ref_zone_unite } = req.body;
-  
-      // Vérifier que tous les champs requis sont présents
-    //  if (!id_releveur || !nombre_compteur || !ref_zone || !ref_zone_unite) {
-     //   return res.status(400).json({ message: 'Tous les champs sont requis' });
-     // }
-  
-      const todayDate = new Date();
-      const newReleve = await Releve.create({
-        id_releveur:id_releveur,
-        nombre_compteur:nombre_compteur,
-        ref_zone:ref_zone,
-        ref_zone_unite:ref_zone_unite,
-        date_releveur: todayDate,
-      });
-  
-      res.status(201).json(newReleve);
-    } catch (error) {
-      res.status(400).json({ message: error.message });
-    }
-  });
+  try {
+    const { id_releveur, nombre_compteur, ref_zone, ref_zone_unite } = req.body;
 
+    // Vérifier que tous les champs requis sont présents
+    if (!id_releveur || !nombre_compteur || !ref_zone || !ref_zone_unite) {
+      return res.status(400).json({ message: 'Tous les champs sont requis' });
+    }
+
+    const todayDate = new Date();
+    const newReleve = new Releve({
+      id_releveur,
+      nombre_compteur,
+      ref_zone,
+      ref_zone_unite,
+      date_releveur: todayDate
+    });
+
+    await newReleve.save();
+    res.status(201).json(newReleve);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
   const getAllReleve = asyncHandler(async (req, res) => {
     try {
         const getReleve = await Releve.find().sort({ date_releveur: -1 });
