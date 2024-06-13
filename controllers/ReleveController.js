@@ -6,9 +6,9 @@ const createReleve = asyncHandler(async (req, res) => {
       const { id_releveur, nombre_compteur, ref_zone, ref_zone_unite } = req.body;
   
       // Vérifier que tous les champs requis sont présents
-      if (!id_releveur || !nombre_compteur || !ref_zone || !ref_zone_unite) {
-        return res.status(400).json({ message: 'Tous les champs sont requis' });
-      }
+    //  if (!id_releveur || !nombre_compteur || !ref_zone || !ref_zone_unite) {
+     //   return res.status(400).json({ message: 'Tous les champs sont requis' });
+     // }
   
       const todayDate = new Date();
       const newReleve = await Releve.create({
