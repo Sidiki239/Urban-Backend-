@@ -218,7 +218,7 @@ router.put('/changePassword/:id', async (req, res) => {
             res.json({
                 _id: findUser?._id,
                 prenom: findUser?.prenom,
-                lastname : findUser?.nom ,
+                nom : findUser?.nom ,
                 username: findUser?.username,
                 userType:findUser?.userType,
                 token: generateToken(findUser?._id)
