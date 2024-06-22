@@ -221,6 +221,8 @@ router.put('/changePassword/:id', async (req, res) => {
                 nom : findUser?.nom ,
                 username: findUser?.username,
                 userType:findUser?.userType,
+                
+                date_ajout:findUser?.date_ajout,
                 token: generateToken(findUser?._id)
             });
         }
